@@ -6,6 +6,7 @@ const client = generateClient<Schema>();
 
 function App() {
   const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
+  const [name, setName] = useState<string | null>("")
 
   useEffect(() => {
     client.models.Todo.observeQuery().subscribe({
@@ -17,13 +18,28 @@ function App() {
     client.models.Todo.create({ content: window.prompt("Todo content") });
   }
 
+  function deleteTodo(id: string) {
+    client.models.Todo.delete({ id });
+  }
+
+  async function sayHello() {
+    const { data } = await client.queries.sayHello({
+      name: window.prompt("Name")!,
+    })
+    console.log('data', data)
+    setName(data)
+  }
+
   return (
     <main>
       <h1>My todos</h1>
+      <button onClick={sayHello}>{name ?? "Say hello"}</button>
       <button onClick={createTodo}>+ new</button>
       <ul>
         {todos.map((todo) => (
-          <li key={todo.id}>{todo.content}</li>
+          <li key={todo.id} onClick={() => deleteTodo(todo.id)}>
+            {todo.content}
+          </li>
         ))}
       </ul>
       <div>
